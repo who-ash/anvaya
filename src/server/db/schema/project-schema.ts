@@ -114,6 +114,7 @@ export const tasks = pgTable('tasks', {
     updatedBy: text('updated_by'),
     deletedBy: text('deleted_by'),
     status: taskStatusEnum('status').notNull(),
+    statusChangedAt: timestamp('status_changed_at').defaultNow(),
 });
 
 export const taskMembers = pgTable('task_members', {

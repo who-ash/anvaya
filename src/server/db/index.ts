@@ -5,6 +5,7 @@ import * as user_schema from './schema/user-schema';
 import * as organization_schema from './schema/organization-schema';
 import * as project_schema from './schema/project-schema';
 import * as chat_schema from './schema/chat-schema';
+import * as time_tracking_schema from './schema/time-tracking-schema';
 
 const schema = {
     ...auth_schema,
@@ -12,6 +13,7 @@ const schema = {
     ...organization_schema,
     ...project_schema,
     ...chat_schema,
+    ...time_tracking_schema,
 };
 const pool = new Pool({
     connectionString: process.env.DATABASE_URL!,

@@ -18,6 +18,7 @@ export const BETTER_AUTH_URL = process.env.BETTER_AUTH_URL!;
 export const BETTER_AUTH_SECRET = process.env.BETTER_AUTH_SECRET!;
 export const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID!;
 export const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET!;
+export const GOOGLE_REDIRECT_URI = process.env.GOOGLE_REDIRECT_URI!;
 
 export const FILE_UPLOAD_MAX_FILE_SIZE_MB = 50 * 1024 * 1024; // 50MB
 export const FILE_UPLOAD_ALLOWED_TYPES = [

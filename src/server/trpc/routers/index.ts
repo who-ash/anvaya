@@ -8,6 +8,7 @@ import { sprintRouter } from './sprint.router';
 import { taskRouter } from './task.router';
 import { taskCommentRouter } from './task-comment.router';
 import { chatRouter } from './chat.router';
+import { timeTrackingRouter } from './time-tracking.router';
 
 export const appRouter = router({
     user: userRouter,
@@ -19,6 +20,7 @@ export const appRouter = router({
     task: taskRouter,
     taskComment: taskCommentRouter,
     chat: chatRouter,
+    timeTracking: timeTrackingRouter,
 });
 
 export type AppRouter = typeof appRouter;

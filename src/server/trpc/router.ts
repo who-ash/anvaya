@@ -18,7 +18,11 @@ export const authenticatedProcedure = t.procedure.use(async ({ ctx, next }) => {
             message: 'Not authenticated: login required',
         });
     }
-    return next();
+    return next({
+        ctx: {
+            session: ctx.session,
+        },
+    });
 });
 
 export const adminProcedure = authenticatedProcedure.use(

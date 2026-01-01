@@ -1,190 +1,175 @@
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Play, Square, Clock, Calendar, CheckCircle2 } from 'lucide-react';
+'use client';
 
-const timeLogs = [
-    {
-        id: 1,
-        task: 'Dashboard UI Design',
-        project: 'Anvaya Core',
-        duration: '2h 15m',
-        date: 'Today',
-    },
-    {
-        id: 2,
-        task: 'API Integration',
-        project: 'E-commerce Platform',
-        duration: '4h 30m',
-        date: 'Today',
-    },
-    {
-        id: 3,
-        task: 'Bug Fixing',
-        project: 'Mobile Banking App',
-        duration: '1h 45m',
-        date: 'Yesterday',
-    },
-    {
-        id: 4,
-        task: 'Meeting with Client',
-        project: 'E-commerce Platform',
-        duration: '1h 00m',
-        date: 'Yesterday',
-    },
-];
+import { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import {
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle,
+} from '@/components/ui/card';
+import { Settings2, Clock, BarChart3, Calendar, PieChart } from 'lucide-react';
+import { TimeSummaryCards } from '@/components/app/dashboard/time-tracking/time-summary-cards';
+import { TaskTimeList } from '@/components/app/dashboard/time-tracking/task-time-list';
+import { ProjectTimeChart } from '@/components/app/dashboard/time-tracking/project-time-chart';
+import { WeeklyHoursChart } from '@/components/app/dashboard/time-tracking/weekly-hours-chart';
+import { CalendarSettings } from '@/components/app/dashboard/time-tracking/calendar-settings';
+import { trpc } from '@/providers/trpc-provider';
+import { Badge } from '@/components/ui/badge';
+import { PlayCircle } from 'lucide-react';
 
 export default function TimeTrackingPage() {
+    const [activeTab, setActiveTab] = useState('tasks');
+
+    const { data: activeTasks } =
+        trpc.timeTracking.getActiveTasksWithTimers.useQuery();
+
+    const hasActiveTasks = activeTasks && activeTasks.length > 0;
+
     return (
         <div className="flex flex-col gap-6">
+            {/* Header */}
             <div className="flex items-center justify-between">
                 <div>
                     <h1 className="text-3xl font-bold tracking-tight">
                         Time Tracking
                     </h1>
                     <p className="text-muted-foreground">
-                        Keep track of your billable hours and productivity.
+                        Automatic time tracking from your task activity
                     </p>
                 </div>
-                <div className="flex items-center gap-2">
-                    <Button variant="outline">
-                        <Calendar className="mr-2 h-4 w-4" /> Calendar View
-                    </Button>
-                    <Button>Report Log</Button>
-                </div>
+                {hasActiveTasks && (
+                    <Badge
+                        variant="outline"
+                        className="border-green-500 text-green-500"
+                    >
+                        <PlayCircle className="mr-1 h-3 w-3 animate-pulse" />
+                        {activeTasks.length} active timer
+                        {activeTasks.length > 1 ? 's' : ''}
+                    </Badge>
+                )}
             </div>
 
-            <Card className="bg-primary/5 border-primary/20">
-                <CardContent className="p-6">
-                    <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
-                        <div className="flex items-center gap-4">
-                            <div className="bg-primary text-primary-foreground rounded-full p-3">
-                                <Play className="h-6 w-6 fill-current" />
-                            </div>
-                            <div>
-                                <p className="text-primary text-sm font-medium">
-                                    Currently Working On
-                                </p>
-                                <h2 className="text-2xl font-bold">
-                                    Creating Mock Data for Pages
-                                </h2>
-                                <p className="text-muted-foreground text-xs">
-                                    Project: Anvaya Infrastructure
-                                </p>
-                            </div>
-                        </div>
-                        <div className="flex items-center gap-8">
-                            <div className="text-center">
-                                <p className="text-muted-foreground text-sm">
-                                    Time Elapsed
-                                </p>
-                                <p className="font-mono text-3xl font-bold">
-                                    00:45:12
-                                </p>
-                            </div>
-                            <Button variant="destructive" size="lg">
-                                <Square className="mr-2 h-4 w-4 fill-current" />{' '}
-                                Stop
-                            </Button>
-                        </div>
+            {/* Summary Cards */}
+            <TimeSummaryCards />
+
+            {/* Tabs */}
+            <Tabs value={activeTab} onValueChange={setActiveTab}>
+                <TabsList className="mb-4 flex h-auto w-fit min-w-full justify-start gap-6 rounded-none border-b bg-transparent p-0 sm:min-w-0">
+                    <TabsTrigger
+                        value="tasks"
+                        className="data-[state=active]:border-primary flex gap-2 rounded-none border-x-0 border-t-0 border-b-2 border-transparent bg-transparent px-2 py-3 text-sm font-medium shadow-none transition-all data-[state=active]:border-b-2 data-[state=active]:bg-transparent data-[state=active]:shadow-none"
+                    >
+                        <Clock className="h-4 w-4" />
+                        <span className="hidden sm:inline">Tasks</span>
+                    </TabsTrigger>
+                    <TabsTrigger
+                        value="projects"
+                        className="data-[state=active]:border-primary flex gap-2 rounded-none border-x-0 border-t-0 border-b-2 border-transparent bg-transparent px-2 py-3 text-sm font-medium shadow-none transition-all data-[state=active]:border-b-2 data-[state=active]:bg-transparent data-[state=active]:shadow-none"
+                    >
+                        <PieChart className="h-4 w-4" />
+                        <span className="hidden sm:inline">Projects</span>
+                    </TabsTrigger>
+                    <TabsTrigger
+                        value="analytics"
+                        className="data-[state=active]:border-primary flex gap-2 rounded-none border-x-0 border-t-0 border-b-2 border-transparent bg-transparent px-2 py-3 text-sm font-medium shadow-none transition-all data-[state=active]:border-b-2 data-[state=active]:bg-transparent data-[state=active]:shadow-none"
+                    >
+                        <BarChart3 className="h-4 w-4" />
+                        <span className="hidden sm:inline">Analytics</span>
+                    </TabsTrigger>
+                    <TabsTrigger
+                        value="calendar"
+                        className="data-[state=active]:border-primary flex gap-2 rounded-none border-x-0 border-t-0 border-b-2 border-transparent bg-transparent px-2 py-3 text-sm font-medium shadow-none transition-all data-[state=active]:border-b-2 data-[state=active]:bg-transparent data-[state=active]:shadow-none"
+                    >
+                        <Calendar className="h-4 w-4" />
+                        <span className="hidden sm:inline">Calendar</span>
+                    </TabsTrigger>
+                </TabsList>
+
+                <TabsContent value="tasks">
+                    <TaskTimeList />
+                </TabsContent>
+
+                <TabsContent value="projects" className="mt-2">
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Time by Project</CardTitle>
+                            <CardDescription>
+                                See how your time is distributed across projects
+                            </CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            <ProjectTimeChart />
+                        </CardContent>
+                    </Card>
+                </TabsContent>
+
+                <TabsContent value="analytics">
+                    <div className="grid gap-6 lg:grid-cols-2">
+                        <Card>
+                            <CardHeader>
+                                <CardTitle>Weekly Hours</CardTitle>
+                                <CardDescription>
+                                    Hours tracked each day this week
+                                </CardDescription>
+                            </CardHeader>
+                            <CardContent>
+                                <WeeklyHoursChart />
+                            </CardContent>
+                        </Card>
+
+                        <Card>
+                            <CardHeader>
+                                <CardTitle>Project Distribution</CardTitle>
+                                <CardDescription>
+                                    Time breakdown by project
+                                </CardDescription>
+                            </CardHeader>
+                            <CardContent>
+                                <ProjectTimeChart />
+                            </CardContent>
+                        </Card>
                     </div>
-                </CardContent>
-            </Card>
 
-            <div className="grid gap-6 md:grid-cols-3">
-                <Card>
-                    <CardHeader className="pb-2">
-                        <CardTitle className="text-sm font-medium">
-                            Today
-                        </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="text-2xl font-bold">6h 45m</div>
-                        <div className="mt-1 flex items-center gap-1 text-xs text-green-500">
-                            <CheckCircle2 className="h-3 w-3" />
-                            <span>On track for goal (8h)</span>
-                        </div>
-                    </CardContent>
-                </Card>
-                <Card>
-                    <CardHeader className="pb-2">
-                        <CardTitle className="text-sm font-medium">
-                            This Week
-                        </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="text-2xl font-bold">32h 15m</div>
-                        <div className="text-muted-foreground mt-1 flex items-center gap-1 text-xs">
-                            <Clock className="h-3 w-3" />
-                            <span>7h remaining to 40h</span>
-                        </div>
-                    </CardContent>
-                </Card>
-                <Card>
-                    <CardHeader className="pb-2">
-                        <CardTitle className="text-sm font-medium">
-                            Billable Amount
-                        </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="text-2xl font-bold">$2,450.00</div>
-                        <div className="mt-1 flex items-center gap-1 text-xs text-green-500">
-                            <TrendingUp className="h-3 w-3" />
-                            <span>+15% from last week</span>
-                        </div>
-                    </CardContent>
-                </Card>
-            </div>
+                    {/* Coming soon features */}
+                    <Card className="mt-4">
+                        <CardHeader>
+                            <CardTitle className="flex items-center gap-2">
+                                <Settings2 className="h-5 w-5" />
+                                Coming Soon
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                                {[
+                                    'Productivity Score',
+                                    'Peak Hours Heatmap',
+                                    'Time Estimates vs Actual',
+                                    'Focus Insights',
+                                    'Weekly Reports',
+                                    'Team Analytics',
+                                ].map((feature) => (
+                                    <div
+                                        key={feature}
+                                        className="bg-muted/50 flex items-center gap-2 rounded-lg p-3"
+                                    >
+                                        <div className="bg-primary/10 h-2 w-2 rounded-full" />
+                                        <span className="text-muted-foreground text-sm">
+                                            {feature}
+                                        </span>
+                                    </div>
+                                ))}
+                            </div>
+                        </CardContent>
+                    </Card>
+                </TabsContent>
 
-            <div className="space-y-4">
-                <h2 className="text-xl font-semibold">Recent Logs</h2>
-                <div className="rounded-md border">
-                    <div className="bg-muted/50 grid grid-cols-4 border-b p-4 font-medium">
-                        <div>Task</div>
-                        <div>Project</div>
-                        <div>Date</div>
-                        <div className="text-right">Duration</div>
-                    </div>
-                    {timeLogs.map((log) => (
-                        <div
-                            key={log.id}
-                            className="hover:bg-muted/30 grid grid-cols-4 border-b p-4 transition-colors last:border-0"
-                        >
-                            <div className="text-sm font-medium">
-                                {log.task}
-                            </div>
-                            <div className="text-muted-foreground text-sm">
-                                {log.project}
-                            </div>
-                            <div className="text-muted-foreground text-sm">
-                                {log.date}
-                            </div>
-                            <div className="text-right font-mono text-sm">
-                                {log.duration}
-                            </div>
-                        </div>
-                    ))}
-                </div>
-            </div>
+                <TabsContent value="calendar">
+                    <CalendarSettings />
+                </TabsContent>
+            </Tabs>
         </div>
-    );
-}
-
-function TrendingUp(props: any) {
-    return (
-        <svg
-            {...props}
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-        >
-            <polyline points="22 7 13.5 15.5 8.5 10.5 2 17" />
-            <polyline points="16 7 22 7 22 13" />
-        </svg>
     );
 }

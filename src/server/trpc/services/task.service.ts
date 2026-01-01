@@ -402,16 +402,31 @@ export const taskService = {
         userId: string,
     ) => {
         try {
+            // Get current task to detect status change
+            const currentTask = await db.query.tasks.findFirst({
+                where: eq(tasks.id, id),
+            });
+
+            const oldStatus = currentTask?.status;
+            const newStatus = data.status;
+
             return await db.transaction(async (tx) => {
                 const { assignees, ...taskData } = data;
 
+                // If status is changing, update statusChangedAt
+                const updateData: any = {
+                    ...taskData,
+                    updatedAt: new Date(),
+                    updatedBy: userId,
+                };
+
+                if (newStatus && newStatus !== oldStatus) {
+                    updateData.statusChangedAt = new Date();
+                }
+
                 const [updatedTask] = await tx
                     .update(tasks)
-                    .set({
-                        ...taskData,
-                        updatedAt: new Date(),
-                        updatedBy: userId,
-                    })
+                    .set(updateData)
                     .where(eq(tasks.id, id))
                     .returning();
 
@@ -449,6 +464,19 @@ export const taskService = {
 
                         await tx.insert(taskMembers).values(memberValues);
                     }
+                }
+
+                // Record status change for time tracking (after transaction commits)
+                if (newStatus && newStatus !== oldStatus) {
+                    // Import dynamically to avoid circular dependency
+                    const { timeTrackingService } =
+                        await import('./time-tracking.service');
+                    await timeTrackingService.recordStatusChange(
+                        id,
+                        userId,
+                        oldStatus || null,
+                        newStatus,
+                    );
                 }
 
                 return updatedTask;
