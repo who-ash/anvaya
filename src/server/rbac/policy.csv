@@ -1,0 +1,67 @@
+# App-level permissions - Admin has full access
+p,app:admin,user:*,create
+p,app:admin,user:*,read
+p,app:admin,user:*,update
+p,app:admin,user:*,delete
+p,app:admin,org:*,create
+p,app:admin,org:*,read
+p,app:admin,org:*,update
+p,app:admin,org:*,delete
+p,app:admin,org:*:members,create
+p,app:admin,org:*:members,read
+p,app:admin,org:*:members,update
+p,app:admin,org:*:members,delete
+p,app:admin,org:*:groups,create
+p,app:admin,org:*:groups,read
+p,app:admin,org:*:groups,update
+p,app:admin,org:*:groups,delete
+p,app:admin,group:*,create
+p,app:admin,group:*,read
+p,app:admin,group:*,update
+p,app:admin,group:*,delete
+p,app:admin,group:*:members,create
+p,app:admin,group:*:members,read
+p,app:admin,group:*:members,update
+p,app:admin,group:*:members,delete
+
+# Organization-level permissions - Admin
+p,org:admin,org:*,read
+p,org:admin,org:*,update
+p,org:admin,org:*,delete
+p,org:admin,org:*:members,read
+p,org:admin,org:*:members,create
+p,org:admin,org:*:members,update
+p,org:admin,org:*:members,delete
+p,org:admin,org:*:groups,read
+p,org:admin,org:*:groups,create
+p,org:admin,org:*:groups,update
+p,org:admin,org:*:groups,delete
+p,org:admin,group:*,read
+p,org:admin,group:*,update
+p,org:admin,group:*,delete
+p,org:admin,group:*:members,read
+p,org:admin,group:*:members,create
+p,org:admin,group:*:members,update
+p,org:admin,group:*:members,delete
+
+# Organization-level permissions - Member
+p,org:member,org:*,read
+p,org:member,org:*:members,read
+p,org:member,org:*:groups,read
+
+# Group-level permissions - Admin
+p,group:admin,group:*,read
+p,group:admin,group:*,update
+p,group:admin,group:*,delete
+p,group:admin,group:*:members,read
+p,group:admin,group:*:members,create
+p,group:admin,group:*:members,update
+p,group:admin,group:*:members,delete
+
+# Group-level permissions - Evaluator
+p,group:evaluator,group:*,read
+p,group:evaluator,group:*:members,read
+
+# Group-level permissions - Member
+p,group:member,group:*,read
+p,group:member,group:*:members,read
