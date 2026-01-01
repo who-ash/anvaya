@@ -4,6 +4,7 @@ import './globals.css';
 import { ThemeProvider } from '@/providers/theme-provider';
 import { TRPCProvider } from '@/providers/trpc-provider';
 import { AbilityProvider } from '@/providers/ability-provider';
+import { OrganizationProvider } from '@/providers/organization-provider';
 import { cn } from '@/lib/utils';
 
 const geistSans = Geist({
@@ -42,7 +43,11 @@ export default function RootLayout({
                     disableTransitionOnChange
                 >
                     <TRPCProvider>
-                        <AbilityProvider>{children}</AbilityProvider>
+                        <AbilityProvider>
+                            <OrganizationProvider>
+                                {children}
+                            </OrganizationProvider>
+                        </AbilityProvider>
                     </TRPCProvider>
                 </ThemeProvider>
             </body>
