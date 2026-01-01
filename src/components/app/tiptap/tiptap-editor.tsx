@@ -7,6 +7,7 @@ import Mathematics, { migrateMathStrings } from '@tiptap/extension-mathematics';
 import 'katex/dist/katex.min.css';
 import { EditorContent, useEditor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
+import Placeholder from '@tiptap/extension-placeholder';
 import {
     AlignCenter,
     AlignLeft,
@@ -64,6 +65,8 @@ import { Link as LinkIcon } from 'lucide-react';
 
 interface TiptapEditorProps {
     onChange?: (content: string) => void;
+    onEditorCreated?: (editor: any) => void;
+    onKeyDown?: (event: any) => boolean;
     initialContent?: string;
     placeholder?: string;
     className?: string;
@@ -73,6 +76,8 @@ interface TiptapEditorProps {
 
 export default function TiptapEditor({
     onChange,
+    onEditorCreated,
+    onKeyDown,
     initialContent = '<p></p>',
     placeholder = 'Type text or add YouTube videos...',
     className,
@@ -204,6 +209,9 @@ export default function TiptapEditor({
         immediatelyRender: false,
         extensions: [
             StarterKit,
+            Placeholder.configure({
+                placeholder: placeholder,
+            }),
             Underline,
             TextAlign.configure({
                 types: ['heading', 'paragraph'],
@@ -300,15 +308,29 @@ export default function TiptapEditor({
         editorProps: {
             attributes: {
                 class: cn(
-                    'prose dark:prose-invert prose-sm sm:prose-base lg:prose-lg xl:prose-xl',
-                    'min-h-[200px] w-full rounded-md border border-input bg-transparent p-4',
-                    'focus-visible:outline-none',
+                    'prose dark:prose-invert prose-sm sm:prose-base lg:prose-lg xl:prose-xl max-w-none',
+                    'text-foreground w-full rounded-md border-input bg-transparent focus-visible:outline-none',
+                    !editorClassName?.includes('p-') && 'p-4',
+                    !editorClassName?.includes('border') && 'border',
+                    !editorClassName?.includes('min-h-') && 'min-h-[200px]',
+                    editorClassName,
                 ),
+            },
+            handleKeyDown: (view, event) => {
+                if (onKeyDown) {
+                    return onKeyDown(event);
+                }
+                return false;
             },
         },
         onUpdate: ({ editor }) => {
             if (onChange) {
                 onChange(editor.getHTML());
+            }
+        },
+        onCreate: ({ editor }) => {
+            if (onEditorCreated) {
+                onEditorCreated(editor);
             }
         },
     });
@@ -815,7 +837,7 @@ export default function TiptapEditor({
                 editor={editor}
                 className={cn(
                     'border-input rounded-b-md border border-t-0',
-                    editorClassName,
+                    hideToolbar && 'rounded-t-md border-t',
                 )}
             />
 
@@ -996,7 +1018,17 @@ export default function TiptapEditor({
             <style jsx global>{`
                 .ProseMirror a {
                     color: #2563eb !important;
-                    text-decoration: underline;
+                }
+                /* Placeholder styling */
+                .ProseMirror p.is-editor-empty:first-child::before {
+                    content: attr(data-placeholder);
+                    float: left;
+                    color: #adb5bd;
+                    pointer-events: none;
+                    height: 0;
+                }
+                .ProseMirror {
+                    color: inherit;
                 }
             `}</style>
         </div>

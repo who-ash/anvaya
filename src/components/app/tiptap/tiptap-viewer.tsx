@@ -7,6 +7,7 @@ import Underline from '@tiptap/extension-underline';
 import Youtube from '@tiptap/extension-youtube';
 import { EditorContent, useEditor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
+import { useState, useEffect } from 'react';
 import { TableKit } from '@tiptap/extension-table';
 import Image from '@tiptap/extension-image';
 import Link from '@tiptap/extension-link';
@@ -141,13 +142,14 @@ export default function TiptapViewer({
                 class: cn(
                     'prose dark:prose-invert',
                     // Different prose sizes based on type
-                    isPreviewMode && 'prose-xs max-h-16 line-clamp-2',
+                    isPreviewMode && 'prose-xs max-h-16 line-clamp-1',
                     isDocumentPreview &&
                         'prose-sm text-[0.8rem] leading-normal p-0 border-0 max-w-none',
                     isNoticePreview &&
                         'prose-xs text-[0.75rem] leading-snug text-muted-foreground p-0 border-0 max-w-none',
                     // Chat message mode - compact inline rendering
-                    isChatMessage && 'prose-sm p-0 border-0 max-w-none',
+                    isChatMessage &&
+                        'prose-sm p-0 border-0 max-w-none text-inherit',
                     // Normal mode
                     !isPreviewMode &&
                         !isDocumentPreview &&
@@ -159,6 +161,12 @@ export default function TiptapViewer({
             },
         },
     });
+
+    useEffect(() => {
+        if (editor && editor.getHTML() !== ensureValidHtml(safeContent)) {
+            editor.commands.setContent(ensureValidHtml(safeContent));
+        }
+    }, [safeContent, editor]);
 
     if (!editor) {
         return null;
@@ -178,13 +186,11 @@ export default function TiptapViewer({
                 .ProseMirror {
                     overflow-wrap: break-word;
                     word-break: break-word;
-                    overflow: hidden;
                 }
                 .ProseMirror * {
                     max-width: 100%;
                     overflow-wrap: break-word;
                     word-break: break-word;
-                    overflow: hidden;
                 }
                 .ProseMirror a {
                     color: #2563eb !important;
