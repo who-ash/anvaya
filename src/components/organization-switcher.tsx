@@ -18,28 +18,29 @@ import {
     SidebarMenuItem,
     useSidebar,
 } from '@/components/ui/sidebar';
+import { useOrganization } from '@/providers/organization-provider';
 
 export function OrganizationSwitcher({
     organizations,
 }: {
     organizations: {
+        id: number;
         name: string;
         logo: React.ElementType;
         plan: string;
     }[];
 }) {
     const { isMobile } = useSidebar();
-    const [activeOrg, setActiveOrg] = React.useState(organizations[0]);
+    const { activeOrgId, setActiveOrgId } = useOrganization();
 
-    React.useEffect(() => {
-        if (organizations.length > 0 && !activeOrg) {
-            setActiveOrg(organizations[0]);
-        }
-    }, [organizations, activeOrg]);
+    const activeOrg =
+        organizations.find((o) => o.id === activeOrgId) || organizations[0];
 
-    if (!activeOrg) {
+    if (!activeOrg && organizations.length > 0) {
         return null;
     }
+
+    if (organizations.length === 0) return null;
 
     return (
         <SidebarMenu>
@@ -76,7 +77,7 @@ export function OrganizationSwitcher({
                         {organizations.map((org, index) => (
                             <DropdownMenuItem
                                 key={org.name}
-                                onClick={() => setActiveOrg(org)}
+                                onClick={() => setActiveOrgId(org.id)}
                                 className="gap-2 p-2"
                             >
                                 <div className="flex size-6 items-center justify-center rounded-md border">

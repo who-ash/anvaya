@@ -21,6 +21,7 @@ import {
     CircleAlert,
     FileText,
     Video,
+    ListTodo,
 } from 'lucide-react';
 
 import { NavMain } from '@/components/nav-main';
@@ -42,6 +43,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
     const teams =
         orgs?.map((org) => ({
+            id: org.id,
             name: org.name,
             logo: Building2,
             plan: org.type,
@@ -57,6 +59,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             title: 'Sprints',
             url: '/dashboard/sprints',
             icon: Zap,
+        },
+        {
+            title: 'Tasks',
+            url: '/dashboard/tasks',
+            icon: ListTodo,
         },
         {
             title: 'Chats',
