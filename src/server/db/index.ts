@@ -3,11 +3,15 @@ import { Pool } from 'pg';
 import * as auth_schema from './schema/auth-schema';
 import * as user_schema from './schema/user-schema';
 import * as organization_schema from './schema/organization-schema';
+import * as project_schema from './schema/project-schema';
+import * as chat_schema from './schema/chat-schema';
 
 const schema = {
     ...auth_schema,
     ...user_schema,
     ...organization_schema,
+    ...project_schema,
+    ...chat_schema,
 };
 const pool = new Pool({
     connectionString: process.env.DATABASE_URL!,
