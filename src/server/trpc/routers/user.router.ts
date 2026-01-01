@@ -14,6 +14,10 @@ const createAdminUserInput = z.object({
 export type CreateAdminUserInput = z.infer<typeof createAdminUserInput>;
 
 export const userRouter = router({
+    getSession: authenticatedProcedure.query(({ ctx }) => {
+        return ctx.session;
+    }),
+
     create: authenticatedProcedure
         .input(createAdminUserInput)
         .use(requirePermission('user:*', 'create'))
