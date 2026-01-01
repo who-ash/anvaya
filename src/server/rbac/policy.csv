@@ -65,3 +65,23 @@ p,group:evaluator,group:*:members,read
 # Group-level permissions - Member
 p,group:member,group:*,read
 p,group:member,group:*:members,read
+
+# Project, Sprint, and Task permissions
+p,org:admin,org:*:projects,create
+p,org:admin,org:*:projects,read
+p,org:admin,org:*:projects,update
+p,org:admin,org:*:projects,delete
+p,org:admin,org:*:projects:sprints,create
+p,org:admin,org:*:projects:sprints,read
+p,org:admin,org:*:projects:sprints,update
+p,org:admin,org:*:projects:sprints,delete
+p,org:admin,org:*:projects:tasks,create
+p,org:admin,org:*:projects:tasks,read
+p,org:admin,org:*:projects:tasks,update
+p,org:admin,org:*:projects:tasks,delete
+
+p,org:member,org:*:projects,read
+p,org:member,org:*:projects:sprints,create
+p,org:member,org:*:projects:sprints,read
+p,org:member,org:*:projects:tasks,create
+p,org:member,org:*:projects:tasks,read

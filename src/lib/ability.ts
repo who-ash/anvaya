@@ -71,6 +71,24 @@ export function buildAbility(permissions: UserPermissions): AppAbility {
             can('read', `org:${orgId}:groups`);
             can('update', `org:${orgId}:groups`);
             can('delete', `org:${orgId}:groups`);
+
+            // org:*:projects
+            can('create', `org:${orgId}:projects`);
+            can('read', `org:${orgId}:projects`);
+            can('update', `org:${orgId}:projects`);
+            can('delete', `org:${orgId}:projects`);
+
+            // org:*:projects:sprints
+            can('create', `org:${orgId}:projects:sprints`);
+            can('read', `org:${orgId}:projects:sprints`);
+            can('update', `org:${orgId}:projects:sprints`);
+            can('delete', `org:${orgId}:projects:sprints`);
+
+            // org:*:projects:tasks
+            can('create', `org:${orgId}:projects:tasks`);
+            can('read', `org:${orgId}:projects:tasks`);
+            can('update', `org:${orgId}:projects:tasks`);
+            can('delete', `org:${orgId}:projects:tasks`);
         });
 
     // Grant org admins permissions on groups within their orgs (hierarchical)
@@ -95,6 +113,13 @@ export function buildAbility(permissions: UserPermissions): AppAbility {
             can('read', `org:${orgId}:members`);
             can('read', `org:${orgId}:groups`);
             can('read', 'course');
+
+            // Projects
+            can('read', `org:${orgId}:projects`);
+            can('create', `org:${orgId}:projects:sprints`);
+            can('read', `org:${orgId}:projects:sprints`);
+            can('create', `org:${orgId}:projects:tasks`);
+            can('read', `org:${orgId}:projects:tasks`);
         });
 
     // Group admin permissions
