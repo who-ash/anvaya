@@ -102,16 +102,6 @@ export const timeTrackingRouter = router({
         .input(
             z.object({
                 defaultCalendarId: z.string().optional(),
-                reminderIntervals: z
-                    .array(
-                        z.enum(
-                            Object.keys(REMINDER_OPTIONS) as [
-                                string,
-                                ...string[],
-                            ],
-                        ),
-                    )
-                    .optional(),
                 syncEnabled: z.boolean().optional(),
             }),
         )

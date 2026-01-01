@@ -2,6 +2,7 @@ import { db } from '@/server/db';
 import {
     calendarSyncSettings,
     calendarEvents,
+    projectCalendarSettings,
 } from '@/server/db/schema/time-tracking-schema';
 import { tasks } from '@/server/db/schema/project-schema';
 import { eq, and } from 'drizzle-orm';
@@ -10,6 +11,7 @@ import {
     GOOGLE_CLIENT_ID,
     GOOGLE_CLIENT_SECRET,
     GOOGLE_REDIRECT_URI,
+    DEFAULT_CALENDAR_REMINDERS,
 } from '@/lib/const';
 
 export const REMINDER_OPTIONS = {
@@ -158,15 +160,21 @@ export const googleCalendarService = {
         const oauth2Client = await this.getAuthenticatedClient(userId);
         const calendar = google.calendar({ version: 'v3', auth: oauth2Client });
 
-        // Build reminders from user settings
-        const reminders =
-            settings.reminderIntervals?.map((interval) => ({
-                method: 'popup' as const,
-                minutes:
-                    REMINDER_OPTIONS[
-                        interval as keyof typeof REMINDER_OPTIONS
-                    ] || 60,
-            })) || [];
+        const projectSettings = task.projectId
+            ? await db.query.projectCalendarSettings.findFirst({
+                  where: eq(projectCalendarSettings.projectId, task.projectId),
+              })
+            : null;
+
+        const reminderIntervals =
+            projectSettings?.reminderIntervals || DEFAULT_CALENDAR_REMINDERS;
+
+        const reminders = reminderIntervals.map((interval) => ({
+            method: 'popup' as const,
+            minutes:
+                REMINDER_OPTIONS[interval as keyof typeof REMINDER_OPTIONS] ||
+                60,
+        }));
 
         const event = {
             summary: `[Task Due] ${task.name}`,
@@ -254,14 +262,22 @@ export const googleCalendarService = {
             return { deleted: true };
         }
 
-        const reminders =
-            settings.reminderIntervals?.map((interval) => ({
-                method: 'popup' as const,
-                minutes:
-                    REMINDER_OPTIONS[
-                        interval as keyof typeof REMINDER_OPTIONS
-                    ] || 60,
-            })) || [];
+        const projectSettingsData = task.projectId
+            ? await db.query.projectCalendarSettings.findFirst({
+                  where: eq(projectCalendarSettings.projectId, task.projectId),
+              })
+            : null;
+
+        const reminderIntervals =
+            projectSettingsData?.reminderIntervals ||
+            DEFAULT_CALENDAR_REMINDERS;
+
+        const reminders = reminderIntervals.map((interval) => ({
+            method: 'popup' as const,
+            minutes:
+                REMINDER_OPTIONS[interval as keyof typeof REMINDER_OPTIONS] ||
+                60,
+        }));
 
         const event = {
             summary: `[Task Due] ${task.name}`,

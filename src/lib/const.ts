@@ -38,3 +38,6 @@ export const FILE_UPLOAD_ALLOWED_TYPES = [
     'application/zip',
     'application/x-zip-compressed',
 ];
+
+// Calendar Reminders
+export const DEFAULT_CALENDAR_REMINDERS = ['1_day', '1_hour'] as const;
