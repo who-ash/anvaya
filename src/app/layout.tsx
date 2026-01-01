@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from 'next/font/google';
 import './globals.css';
 import { ThemeProvider } from '@/providers/theme-provider';
 import { TRPCProvider } from '@/providers/trpc-provider';
+import { AbilityProvider } from '@/providers/ability-provider';
 import { cn } from '@/lib/utils';
 
 const geistSans = Geist({
@@ -40,7 +41,9 @@ export default function RootLayout({
                     enableSystem
                     disableTransitionOnChange
                 >
-                    <TRPCProvider>{children}</TRPCProvider>
+                    <TRPCProvider>
+                        <AbilityProvider>{children}</AbilityProvider>
+                    </TRPCProvider>
                 </ThemeProvider>
             </body>
         </html>
