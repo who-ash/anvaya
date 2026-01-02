@@ -7,8 +7,10 @@ import {
     sprints as sprintsTable,
     projectMembers,
 } from '@/server/db/schema/project-schema';
+import { calendarEvents } from '@/server/db/schema/time-tracking-schema';
 import { eq, and, isNull, inArray, SQL, exists } from 'drizzle-orm';
 import Fuse from 'fuse.js';
+import { googleCalendarService } from './google-calendar.service';
 
 export const taskService = {
     createTask: async (
@@ -60,6 +62,8 @@ export const taskService = {
 
                     await tx.insert(taskMembers).values(memberValues);
                 }
+
+                taskService.triggerCalendarSync(task.id).catch(console.error);
 
                 return task;
             });
@@ -115,7 +119,10 @@ export const taskService = {
                 );
 
             const members = memberResults
-                .filter((r) => r.user)
+                .filter(
+                    (r): r is typeof r & { user: NonNullable<typeof r.user> } =>
+                        !!r.user,
+                )
                 .map((r) => r.user);
 
             return {
@@ -479,6 +486,9 @@ export const taskService = {
                     );
                 }
 
+                console.log('Triggering calendar sync for task:', id);
+                taskService.triggerCalendarSync(id).catch(console.error);
+                console.log('Calendar sync triggered for task:', id);
                 return updatedTask;
             });
         } catch (error) {
@@ -509,7 +519,12 @@ export const taskService = {
                     ),
                 );
 
-            return memberResults.filter((r) => r.user).map((r) => r.user);
+            return memberResults
+                .filter(
+                    (r): r is typeof r & { user: NonNullable<typeof r.user> } =>
+                        !!r.user,
+                )
+                .map((r) => r.user);
         } catch (error) {
             throw error;
         }
@@ -531,9 +546,84 @@ export const taskService = {
                 throw new Error('Task not found');
             }
 
+            if (deletedTask) {
+                taskService.triggerCalendarSync(id, true).catch(console.error);
+            }
+
             return deletedTask;
         } catch (error) {
             throw error;
+        }
+    },
+
+    /**
+     * Trigger Google Calendar sync for all assignees of a task
+     */
+    triggerCalendarSync: async (taskId: number, isDeleted = false) => {
+        try {
+            if (isDeleted) {
+                const existingEvents = await db.query.calendarEvents.findMany({
+                    where: eq(calendarEvents.taskId, taskId),
+                });
+                for (const event of existingEvents) {
+                    await googleCalendarService
+                        .deleteTaskEvent(event.userId, taskId)
+                        .catch(() => {});
+                }
+                return;
+            }
+
+            const assignees = await taskService.getTaskAssignees(taskId);
+            const assigneeIds = new Set(assignees.map((a) => a.id));
+
+            const existingEvents = await db.query.calendarEvents.findMany({
+                where: eq(calendarEvents.taskId, taskId),
+            });
+            const usersWithEvents = new Set(
+                existingEvents.map((e) => e.userId),
+            );
+
+            for (const assigneeId of assigneeIds) {
+                console.log(
+                    `Updating calendar event for assignee: ${assigneeId}`,
+                );
+                await googleCalendarService
+                    .updateTaskEvent(assigneeId, taskId)
+                    .then(() =>
+                        console.log(
+                            `Successfully updated calendar event for assignee: ${assigneeId}`,
+                        ),
+                    )
+                    .catch((err) => {
+                        console.error(
+                            `Failed to update calendar event for assignee ${assigneeId}:`,
+                            err.message,
+                        );
+                    });
+            }
+
+            for (const userId of usersWithEvents) {
+                if (!assigneeIds.has(userId)) {
+                    console.log(
+                        `Deleting calendar event for former assignee: ${userId}`,
+                    );
+                    await googleCalendarService
+                        .deleteTaskEvent(userId, taskId)
+                        .then(() =>
+                            console.log(
+                                `Successfully deleted calendar event for former assignee: ${userId}`,
+                            ),
+                        )
+                        .catch((err) => {
+                            console.error(
+                                `Failed to delete calendar event for former assignee ${userId}:`,
+                                err.message,
+                            );
+                        });
+                }
+            }
+        } catch (error) {
+            console.error('Error triggering calendar sync:', error);
         }
     },
 };
