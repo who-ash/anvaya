@@ -23,6 +23,18 @@ export const REMINDER_OPTIONS = {
     '1_week': 10080,
 } as const;
 
+function getStatusLabel(status: string): string {
+    const statusLabels: Record<string, string> = {
+        todo: 'To Do',
+        'in-progress': 'In Progress',
+        done: 'Done',
+        'on-hold': 'On Hold',
+        'in-review': 'In Review',
+        rejected: 'Rejected',
+    };
+    return statusLabels[status] || status;
+}
+
 function getOAuth2Client() {
     return new google.auth.OAuth2(
         GOOGLE_CLIENT_ID,
@@ -146,6 +158,9 @@ export const googleCalendarService = {
         });
 
         if (!task || !task.endDate) {
+            console.warn(
+                `[CalendarSync] Skipping event creation for task ${taskId}: task not found or has no due date`,
+            );
             throw new Error('Task not found or has no due date');
         }
 
@@ -154,7 +169,17 @@ export const googleCalendarService = {
         });
 
         if (!settings?.syncEnabled) {
+            console.warn(
+                `[CalendarSync] Skipping event creation for user ${userId}: sync not enabled`,
+            );
             throw new Error('Calendar sync not enabled');
+        }
+
+        if (!settings?.googleRefreshToken) {
+            console.warn(
+                `[CalendarSync] Skipping event creation for user ${userId}: no google refresh token`,
+            );
+            throw new Error('User not connected to Google Calendar');
         }
 
         const oauth2Client = await this.getAuthenticatedClient(userId);
@@ -177,8 +202,8 @@ export const googleCalendarService = {
         }));
 
         const event = {
-            summary: `[Task Due] ${task.name}`,
-            description: `Task: ${task.name}\nProject: ${task.project?.name || 'N/A'}\n\n${task.description || ''}`,
+            summary: `Status on ${task.name}`,
+            description: `${task.name} in project ${task.project?.name || 'N/A'} is currently ${getStatusLabel(task.status)}.\n\nDue: ${task.endDate.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })}\n\nThis event will be removed when the task is completed, deleted, or you are unassigned.`,
             start: {
                 dateTime: task.endDate.toISOString(),
                 timeZone: 'UTC',
@@ -280,8 +305,8 @@ export const googleCalendarService = {
         }));
 
         const event = {
-            summary: `[Task Due] ${task.name}`,
-            description: `Task: ${task.name}\nProject: ${task.project?.name || 'N/A'}\n\n${task.description || ''}`,
+            summary: `Status on ${task.name}`,
+            description: `${task.name} in project ${task.project?.name || 'N/A'} is currently ${getStatusLabel(task.status)}.\n\nDue: ${task.endDate.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })}\n\nThis event will be removed when the task is completed, deleted, or you are unassigned.`,
             start: {
                 dateTime: task.endDate.toISOString(),
                 timeZone: 'UTC',
@@ -289,7 +314,7 @@ export const googleCalendarService = {
             end: {
                 dateTime: new Date(
                     task.endDate.getTime() + 30 * 60 * 1000,
-                ).toISOString(),
+                ).toISOString(), // 30 min duration
                 timeZone: 'UTC',
             },
             reminders: {
