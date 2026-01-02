@@ -561,6 +561,7 @@ export const taskService = {
      */
     triggerCalendarSync: async (taskId: number, isDeleted = false) => {
         try {
+            // If task is deleted, remove all calendar events
             if (isDeleted) {
                 const existingEvents = await db.query.calendarEvents.findMany({
                     where: eq(calendarEvents.taskId, taskId),
@@ -573,8 +574,25 @@ export const taskService = {
                 return;
             }
 
-            const assignees = await taskService.getTaskAssignees(taskId);
-            const assigneeIds = new Set(assignees.map((a) => a.id));
+            // Get the task to check its status
+            const task = await db.query.tasks.findFirst({
+                where: eq(tasks.id, taskId),
+            });
+
+            if (!task) {
+                console.warn(`[CalendarSync] Task ${taskId} not found`);
+                return;
+            }
+
+            // Statuses that should have calendar events
+            const activeStatuses = [
+                'todo',
+                'in-progress',
+                'in-review',
+                'on-hold',
+            ];
+            // Statuses that should NOT have calendar events (delete if exists)
+            const completedStatuses = ['done', 'rejected'];
 
             const existingEvents = await db.query.calendarEvents.findMany({
                 where: eq(calendarEvents.taskId, taskId),
@@ -583,43 +601,74 @@ export const taskService = {
                 existingEvents.map((e) => e.userId),
             );
 
-            for (const assigneeId of assigneeIds) {
+            // If task is completed or rejected, delete all calendar events
+            if (completedStatuses.includes(task.status)) {
                 console.log(
-                    `Updating calendar event for assignee: ${assigneeId}`,
+                    `[CalendarSync] Task ${taskId} is ${task.status}, removing calendar events`,
                 );
-                await googleCalendarService
-                    .updateTaskEvent(assigneeId, taskId)
-                    .then(() =>
-                        console.log(
-                            `Successfully updated calendar event for assignee: ${assigneeId}`,
-                        ),
-                    )
-                    .catch((err) => {
-                        console.error(
-                            `Failed to update calendar event for assignee ${assigneeId}:`,
-                            err.message,
-                        );
-                    });
-            }
-
-            for (const userId of usersWithEvents) {
-                if (!assigneeIds.has(userId)) {
-                    console.log(
-                        `Deleting calendar event for former assignee: ${userId}`,
-                    );
+                for (const event of existingEvents) {
                     await googleCalendarService
-                        .deleteTaskEvent(userId, taskId)
+                        .deleteTaskEvent(event.userId, taskId)
                         .then(() =>
                             console.log(
-                                `Successfully deleted calendar event for former assignee: ${userId}`,
+                                `Successfully deleted calendar event for user: ${event.userId}`,
                             ),
                         )
                         .catch((err) => {
                             console.error(
-                                `Failed to delete calendar event for former assignee ${userId}:`,
+                                `Failed to delete calendar event for user ${event.userId}:`,
                                 err.message,
                             );
                         });
+                }
+                return;
+            }
+
+            // If task has an active status, create/update events for assignees
+            if (activeStatuses.includes(task.status)) {
+                const assignees = await taskService.getTaskAssignees(taskId);
+                const assigneeIds = new Set(assignees.map((a) => a.id));
+
+                // Create/Update for all current assignees
+                for (const assigneeId of assigneeIds) {
+                    console.log(
+                        `Updating calendar event for assignee: ${assigneeId}`,
+                    );
+                    await googleCalendarService
+                        .updateTaskEvent(assigneeId, taskId)
+                        .then(() =>
+                            console.log(
+                                `Successfully updated calendar event for assignee: ${assigneeId}`,
+                            ),
+                        )
+                        .catch((err) => {
+                            console.error(
+                                `Failed to update calendar event for assignee ${assigneeId}:`,
+                                err.message,
+                            );
+                        });
+                }
+
+                // Delete for users who were assignees but are no longer
+                for (const userId of usersWithEvents) {
+                    if (!assigneeIds.has(userId)) {
+                        console.log(
+                            `Deleting calendar event for former assignee: ${userId}`,
+                        );
+                        await googleCalendarService
+                            .deleteTaskEvent(userId, taskId)
+                            .then(() =>
+                                console.log(
+                                    `Successfully deleted calendar event for former assignee: ${userId}`,
+                                ),
+                            )
+                            .catch((err) => {
+                                console.error(
+                                    `Failed to delete calendar event for former assignee ${userId}:`,
+                                    err.message,
+                                );
+                            });
+                    }
                 }
             }
         } catch (error) {
