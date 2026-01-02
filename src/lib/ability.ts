@@ -23,6 +23,11 @@ export type UserPermissions = {
         orgId: number;
         role: 'admin' | 'evaluator' | 'member' | null;
     }[];
+    projectRoles: {
+        projectId: number;
+        orgId: number;
+        role: 'admin' | 'member';
+    }[];
 };
 
 /**
@@ -149,6 +154,35 @@ export function buildAbility(permissions: UserPermissions): AppAbility {
         .forEach(({ groupId, orgId }) => {
             can('read', `group:${groupId}`);
             can('read', `group:${groupId}:members`);
+        });
+
+    // Project admin permissions
+    permissions.projectRoles
+        .filter((r) => r.role === 'admin')
+        .forEach(({ projectId, orgId }) => {
+            // Project admins can manage tasks and sprints within their projects
+            can('create', `org:${orgId}:projects:tasks`);
+            can('read', `org:${orgId}:projects:tasks`);
+            can('update', `org:${orgId}:projects:tasks`);
+            can('delete', `org:${orgId}:projects:tasks`);
+
+            can('create', `org:${orgId}:projects:sprints`);
+            can('read', `org:${orgId}:projects:sprints`);
+            can('update', `org:${orgId}:projects:sprints`);
+            can('delete', `org:${orgId}:projects:sprints`);
+
+            // Project admins can also update the project itself
+            can('read', `org:${orgId}:projects`);
+            can('update', `org:${orgId}:projects`);
+        });
+
+    // Project member permissions
+    permissions.projectRoles
+        .filter((r) => r.role === 'member')
+        .forEach(({ projectId, orgId }) => {
+            can('read', `org:${orgId}:projects`);
+            can('read', `org:${orgId}:projects:tasks`);
+            can('read', `org:${orgId}:projects:sprints`);
         });
 
     return build();

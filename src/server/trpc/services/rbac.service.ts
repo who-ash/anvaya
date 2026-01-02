@@ -6,6 +6,7 @@ import {
     organizationGroupMembers,
     organizationGroups,
 } from '@/server/db/schema/organization-schema';
+import { projectMembers, projects } from '@/server/db/schema/project-schema';
 import { eq, and, isNull } from 'drizzle-orm';
 import { users } from '@/server/db/schema/auth-schema';
 
@@ -167,6 +168,7 @@ class RBACService {
     /**
      * Check if a user has permission to perform an action on a resource
      * This checks the user's actual roles from the database against the static policies
+     * Also includes project-level permission checks for tasks and sprints
      */
     async checkPermission(
         userId: string,
@@ -215,6 +217,24 @@ class RBACService {
                 return true;
             }
         }
+
+        if (
+            organizationId &&
+            (resource.includes(':projects:tasks') ||
+                resource.includes(':projects:sprints'))
+        ) {
+            const projectRoles = await this.getUserProjects(userId);
+            const isProjectAdminInOrg = projectRoles.some(
+                (pr) => pr.orgId === organizationId && pr.role === 'admin',
+            );
+
+            if (isProjectAdminInOrg) {
+                if (['create', 'read', 'update', 'delete'].includes(action)) {
+                    return true;
+                }
+            }
+        }
+
         return false;
     }
 
@@ -263,6 +283,54 @@ class RBACService {
         });
 
         return memberships.map((m) => m.groupId);
+    }
+
+    /**
+     * Get user's role in a specific project from database
+     */
+    async getUserProjectRole(
+        userId: string,
+        projectId: number,
+    ): Promise<'admin' | 'member' | null> {
+        const membership = await db.query.projectMembers.findFirst({
+            where: and(
+                eq(projectMembers.userId, userId),
+                eq(projectMembers.projectId, projectId),
+                isNull(projectMembers.deletedAt),
+            ),
+        });
+
+        if (!membership) return null;
+        return membership.role as 'admin' | 'member';
+    }
+
+    /**
+     * Get user's projects with their roles and organization IDs
+     */
+    async getUserProjects(
+        userId: string,
+    ): Promise<
+        { projectId: number; orgId: number; role: 'admin' | 'member' }[]
+    > {
+        const memberships = await db.query.projectMembers.findMany({
+            where: and(
+                eq(projectMembers.userId, userId),
+                isNull(projectMembers.deletedAt),
+            ),
+            with: {
+                project: {
+                    columns: {
+                        organizationId: true,
+                    },
+                },
+            },
+        });
+
+        return memberships.map((m) => ({
+            projectId: m.projectId,
+            orgId: m.project?.organizationId || 0,
+            role: m.role as 'admin' | 'member',
+        }));
     }
 }
 

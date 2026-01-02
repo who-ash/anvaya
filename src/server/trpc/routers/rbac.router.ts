@@ -4,15 +4,16 @@ import { rbacService } from '../services/rbac.service';
 export const rbacRouter = router({
     /**
      * Get user's permissions for client-side CASL ability
-     * Returns app role, org roles, and group roles with their org context
+     * Returns app role, org roles, group roles, and project roles with their org context
      */
     getUserPermissions: authenticatedProcedure.query(async ({ ctx }) => {
         const userId = ctx.session!.user.id;
 
-        const [appRole, orgIds, groupIds] = await Promise.all([
+        const [appRole, orgIds, groupIds, projectRoles] = await Promise.all([
             rbacService.getUserAppRole(userId),
             rbacService.getUserOrganizations(userId),
             rbacService.getUserGroups(userId),
+            rbacService.getUserProjects(userId),
         ]);
 
         // Get roles for each org
@@ -78,6 +79,7 @@ export const rbacRouter = router({
                     role: 'admin' | 'evaluator' | 'member' | null;
                 } => r.orgId !== 0,
             ),
+            projectRoles: projectRoles.filter((r) => r.orgId !== 0),
         };
     }),
 });
