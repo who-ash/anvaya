@@ -72,6 +72,7 @@ interface TiptapEditorProps {
     className?: string;
     editorClassName?: string;
     hideToolbar?: boolean;
+    autoFocus?: boolean | 'start' | 'end' | 'all' | number | null;
 }
 
 export default function TiptapEditor({
@@ -83,6 +84,7 @@ export default function TiptapEditor({
     className,
     editorClassName,
     hideToolbar = false,
+    autoFocus = false,
 }: TiptapEditorProps) {
     const [youtubeDialogOpen, setYoutubeDialogOpen] = useState(false);
     const [youtubeUrl, setYoutubeUrl] = useState('');
@@ -207,6 +209,7 @@ export default function TiptapEditor({
 
     const editor = useEditor({
         immediatelyRender: false,
+        autofocus: autoFocus,
         extensions: [
             StarterKit,
             Placeholder.configure({
