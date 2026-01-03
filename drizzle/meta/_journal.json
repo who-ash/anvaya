@@ -57,6 +57,20 @@
             "when": 1767293862844,
             "tag": "0007_loose_synch",
             "breakpoints": true
+        },
+        {
+            "idx": 8,
+            "version": "7",
+            "when": 1767392604948,
+            "tag": "0008_fearless_daredevil",
+            "breakpoints": true
+        },
+        {
+            "idx": 9,
+            "version": "7",
+            "when": 1767395587799,
+            "tag": "0009_parched_kabuki",
+            "breakpoints": true
         }
     ]
 }

@@ -10,6 +10,7 @@ export default defineConfig({
     './src/server/db/schema/project-schema.ts',
     './src/server/db/schema/chat-schema.ts',
     './src/server/db/schema/time-tracking-schema.ts',
+    './src/server/db/schema/request-schema.ts',
   ],
   dialect: 'postgresql',
   dbCredentials: {
