@@ -48,12 +48,20 @@ const BreadcrumbLabel = ({
         { enabled: isId && parentPart === 'tasks' },
     );
 
+    // Fetch request by ID
+    const { data: request } = trpc.request.getById.useQuery(
+        { id: Number(part) },
+        { enabled: isId && parentPart === 'requests' },
+    );
+
     if (isId) {
         if (parentPart === 'projects' && project)
             return <span>{project.name}</span>;
         if (parentPart === 'sprints' && sprint)
             return <span>{sprint.name}</span>;
         if (parentPart === 'tasks' && task) return <span>{task.name}</span>;
+        if (parentPart === 'requests' && request)
+            return <span>{request.title}</span>;
         return <span>Loading...</span>;
     }
 
@@ -106,8 +114,8 @@ export default function DashboardLayout({
     return (
         <SidebarProvider>
             <AppSidebar />
-            <SidebarInset>
-                <header className="flex h-16 shrink-0 items-center gap-2 border-b transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12">
+            <SidebarInset className="overflow-x-hidden overflow-y-auto scroll-smooth">
+                <header className="bg-background/95 supports-[backdrop-filter]:bg-background/60 sticky top-0 z-10 flex h-16 shrink-0 items-center gap-2 border-b backdrop-blur transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12">
                     <div className="flex items-center gap-2 px-4">
                         <SidebarTrigger className="-ml-1" />
                         <Separator
