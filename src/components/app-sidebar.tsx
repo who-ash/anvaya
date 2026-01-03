@@ -76,26 +76,26 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             icon: Clock,
         },
         {
-            title: 'Issues',
-            url: '/dashboard/issues',
+            title: 'Requests',
+            url: '/dashboard/requests',
             icon: CircleAlert,
-        },
-        {
-            title: 'Report',
-            url: '/dashboard/reports',
-            icon: FileText,
         },
         {
             title: 'Board Room',
             url: '/dashboard/meet',
             icon: Video,
         },
-
         {
-            title: 'GPT',
-            url: '/dashboard/gpt',
-            icon: Bot,
+            title: 'Report',
+            url: '/dashboard/reports',
+            icon: FileText,
         },
+
+        // {
+        //     title: 'GPT',
+        //     url: '/dashboard/gpt',
+        //     icon: Bot,
+        // },
     ];
 
     return (
