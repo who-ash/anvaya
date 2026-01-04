@@ -145,3 +145,187 @@
 .scrollbar-thin::-webkit-scrollbar-thumb:hover {
     background-color: rgba(156, 163, 175, 0.7);
 }
+
+/* ===== LiveKit Component Overrides ===== */
+[data-lk-theme='default'] {
+    --lk-bg: var(--background);
+    --lk-bg2: var(--muted);
+    --lk-bg3: var(--secondary);
+    --lk-fg: var(--foreground);
+    --lk-border-color: var(--border);
+    --lk-control-bg: var(--secondary);
+    --lk-control-fg: var(--foreground);
+    --lk-control-hover-bg: var(--accent);
+    --lk-accent-bg: var(--primary);
+    --lk-accent-fg: var(--primary-foreground);
+    --lk-danger: var(--destructive);
+    height: 100%;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.dark [data-lk-theme='default'] {
+    --lk-bg: var(--background);
+    --lk-bg2: var(--card);
+    --lk-bg3: var(--muted);
+    --lk-fg: var(--foreground);
+    --lk-border-color: var(--border);
+    --lk-control-bg: var(--secondary);
+    --lk-control-fg: var(--foreground);
+}
+
+/* Force LiveKit Room to fill container */
+[data-lk-theme],
+.lk-room-container,
+.lk-video-conference,
+.lk-grid-layout,
+.lk-focus-layout {
+    height: 100% !important;
+    width: 100% !important;
+    display: flex !important;
+    flex-direction: column !important;
+    flex: 1 !important;
+    min-height: 0 !important;
+    max-height: 100% !important;
+    background-color: var(--background) !important;
+}
+
+/* Participant tiles */
+.lk-participant-tile {
+    background-color: var(--lk-bg2) !important;
+    border-radius: 0.5rem !important;
+    border: 1px solid var(--lk-border-color) !important;
+}
+
+.lk-participant-name {
+    color: var(--lk-fg) !important;
+}
+
+/* Control bar - now handled in component's inline styles */
+.lk-control-bar {
+    background-color: transparent !important;
+    border: none !important;
+    padding: 0 !important;
+}
+
+/* Control buttons - now handled in component's inline styles */
+.lk-button {
+    background-color: var(--lk-control-bg) !important;
+    color: var(--lk-control-fg) !important;
+    border: 1px solid var(--lk-border-color) !important;
+    border-radius: 0.5rem !important;
+    transition: all 0.15s ease !important;
+}
+
+.lk-button:hover {
+    background-color: var(--lk-control-hover-bg) !important;
+}
+
+.lk-button[data-lk-enabled='false'] {
+    background-color: var(--lk-danger) !important;
+    color: white !important;
+    border-color: var(--lk-danger) !important;
+}
+
+/* Disconnect button */
+.lk-disconnect-button {
+    background-color: var(--lk-danger) !important;
+    color: white !important;
+    border-color: var(--lk-danger) !important;
+}
+
+.lk-disconnect-button:hover {
+    filter: brightness(0.9) !important;
+}
+
+/* Chat panel */
+.lk-chat {
+    background-color: var(--background) !important;
+    border-color: var(--border) !important;
+    height: 100% !important;
+    display: flex !important;
+    flex-direction: column !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+}
+
+.lk-chat-header {
+    background-color: var(--lk-bg2) !important;
+    border-bottom: 1px solid var(--lk-border-color) !important;
+    color: var(--lk-fg) !important;
+    padding: 0.75rem 1rem !important;
+}
+
+.lk-chat-messages {
+    flex: 1 !important;
+    overflow-y: auto !important;
+    background-color: var(--lk-bg) !important;
+}
+
+.lk-chat-entry {
+    color: var(--lk-fg) !important;
+}
+
+.lk-chat-form {
+    background-color: var(--lk-bg2) !important;
+    border-top: 1px solid var(--lk-border-color) !important;
+    padding: 0.75rem !important;
+}
+
+.lk-chat-form-input {
+    background-color: var(--lk-bg) !important;
+    color: var(--lk-fg) !important;
+    border: 1px solid var(--lk-border-color) !important;
+    border-radius: 0.375rem !important;
+    padding: 0.5rem 0.75rem !important;
+}
+
+.lk-chat-form-input::placeholder {
+    color: var(--lk-fg) !important;
+    opacity: 0.5 !important;
+}
+
+.lk-chat-form-button {
+    background-color: var(--lk-accent-bg) !important;
+    color: var(--lk-accent-fg) !important;
+    border-radius: 0.375rem !important;
+}
+
+/* Focus toggle button */
+.lk-focus-toggle-button {
+    background-color: var(--lk-control-bg) !important;
+    color: var(--lk-control-fg) !important;
+}
+
+/* Icon colors */
+.lk-button svg,
+.lk-control-bar svg {
+    color: currentColor !important;
+}
+
+/* Meeting Chat Styles */
+.chat-message-content .ProseMirror {
+    padding: 0 !important;
+    border: none !important;
+    min-height: auto !important;
+}
+
+.chat-message-content .ProseMirror p {
+    margin: 0 !important;
+}
+
+.chat-message-content .ProseMirror p:first-child {
+    margin-top: 0 !important;
+}
+
+.chat-message-content .ProseMirror p:last-child {
+    margin-bottom: 0 !important;
+}
+
+.chat-message-content .prose {
+    font-size: inherit !important;
+    line-height: 1.4 !important;
+    color: inherit !important;
+}
