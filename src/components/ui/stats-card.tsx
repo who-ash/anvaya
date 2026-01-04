@@ -7,6 +7,7 @@ interface StatsCardProps {
     icon: LucideIcon;
     period?: string;
     iconColor?: string;
+    onClick?: () => void;
 }
 
 export function StatsCard({
@@ -15,9 +16,17 @@ export function StatsCard({
     icon: Icon,
     period,
     iconColor = 'text-primary',
+    onClick,
 }: StatsCardProps) {
     return (
-        <Card>
+        <Card
+            className={
+                onClick
+                    ? 'hover:bg-muted/50 cursor-pointer transition-colors'
+                    : ''
+            }
+            onClick={onClick}
+        >
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">{title}</CardTitle>
                 <div

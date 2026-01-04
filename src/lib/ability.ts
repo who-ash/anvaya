@@ -117,7 +117,6 @@ export function buildAbility(permissions: UserPermissions): AppAbility {
             can('read', `org:${orgId}`);
             can('read', `org:${orgId}:members`);
             can('read', `org:${orgId}:groups`);
-            can('read', 'course');
 
             // Projects
             can('read', `org:${orgId}:projects`);
