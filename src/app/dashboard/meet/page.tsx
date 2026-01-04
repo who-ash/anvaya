@@ -1,206 +1,432 @@
+'use client';
+
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
 import {
-    Mic,
-    MicOff,
-    Video as VideoIcon,
+    Card,
+    CardContent,
+    CardHeader,
+    CardTitle,
+    CardDescription,
+} from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
+import { Badge } from '@/components/ui/badge';
+import {
+    Video,
+    Plus,
+    History,
+    Link as LinkIcon,
+    Loader2,
+    Calendar,
+    User,
+    ArrowRight,
     VideoOff,
-    PhoneOff,
-    Settings,
     Users,
-    MessageSquare,
-    Hand,
-    MoreHorizontal,
+    FolderKanban,
+    Radio,
 } from 'lucide-react';
+import { trpc } from '@/server/trpc/client';
+import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
+import { format } from 'date-fns';
+import { useOrganization } from '@/providers/organization-provider';
 
 export default function MeetPage() {
-    return (
-        <div className="flex h-[calc(100vh-120px)] flex-col gap-4">
-            <div className="flex items-center justify-between">
-                <div>
-                    <h1 className="text-2xl font-bold tracking-tight">
-                        Board Room
-                    </h1>
-                    <p className="text-muted-foreground text-sm">
-                        Strategic planning & high-level meetings.
-                    </p>
-                </div>
-                <div className="flex items-center gap-2">
-                    <div className="mr-4 flex -space-x-2">
-                        {[1, 2, 3, 4].map((i) => (
-                            <div
-                                key={i}
-                                className="border-background bg-muted flex h-8 w-8 items-center justify-center rounded-full border-2 text-[10px] font-bold"
-                            >
-                                U{i}
-                            </div>
-                        ))}
-                        <div className="border-background bg-primary text-primary-foreground flex h-8 w-8 items-center justify-center rounded-full border-2 text-[10px] font-bold">
-                            +12
-                        </div>
-                    </div>
-                    <Button variant="outline" size="sm">
-                        <Settings className="mr-2 h-4 w-4" /> Setup
-                    </Button>
-                    <Button size="sm">Join Meeting</Button>
-                </div>
-            </div>
+    const router = useRouter();
+    const { activeOrgId, isLoading: orgLoading } = useOrganization();
 
-            <div className="grid flex-1 grid-cols-1 gap-4 md:grid-cols-4">
-                {/* Main video area */}
-                <div className="grid grid-cols-2 gap-4 md:col-span-3">
-                    <Card className="bg-muted border-primary relative aspect-video overflow-hidden border-2">
-                        <CardContent className="flex h-full items-center justify-center p-0">
-                            <div className="bg-primary/20 text-primary flex h-20 w-20 items-center justify-center rounded-full text-3xl font-bold">
-                                YO
-                            </div>
-                            <div className="bg-background/80 absolute bottom-4 left-4 rounded border px-2 py-1 text-xs font-medium backdrop-blur-sm">
-                                You (Host)
-                            </div>
-                            <div className="absolute top-4 right-4 h-2 w-2 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]" />
-                        </CardContent>
-                    </Card>
-                    <Card className="bg-muted relative aspect-video overflow-hidden">
-                        <CardContent className="flex h-full items-center justify-center p-0">
-                            <div className="bg-muted-foreground/20 flex h-20 w-20 items-center justify-center rounded-full text-3xl font-bold">
-                                JS
-                            </div>
-                            <div className="bg-background/80 absolute bottom-4 left-4 rounded border px-2 py-1 text-xs font-medium backdrop-blur-sm">
-                                Jessica Smith
-                            </div>
-                        </CardContent>
-                    </Card>
-                    <Card className="bg-muted relative aspect-video overflow-hidden">
-                        <CardContent className="flex h-full items-center justify-center p-0">
-                            <div className="bg-muted-foreground/20 flex h-20 w-20 items-center justify-center rounded-full text-3xl font-bold">
-                                MK
-                            </div>
-                            <div className="bg-background/80 absolute bottom-4 left-4 rounded border px-2 py-1 text-xs font-medium backdrop-blur-sm">
-                                Mark Kim
-                            </div>
-                        </CardContent>
-                    </Card>
-                    <Card className="bg-muted relative aspect-video overflow-hidden">
-                        <CardContent className="text-muted-foreground flex h-full flex-col items-center justify-center gap-2 p-0">
-                            <VideoOff className="h-10 w-10 opacity-20" />
-                            <span className="text-xs font-medium">
-                                Camera Off
-                            </span>
-                            <div className="bg-background/80 absolute bottom-4 left-4 rounded border px-2 py-1 text-xs font-medium backdrop-blur-sm">
-                                Andrew Sy
-                            </div>
-                        </CardContent>
-                    </Card>
-                </div>
+    const [roomName, setRoomName] = useState('');
+    const [selectedProjectId, setSelectedProjectId] = useState<
+        number | undefined
+    >();
+    const [inviteCode, setInviteCode] = useState('');
+    const [isCreating, setIsCreating] = useState(false);
 
-                {/* Sidebar for chat/participants */}
-                <div className="bg-muted/10 hidden flex-col gap-4 rounded-xl border p-4 md:flex">
-                    <div className="flex items-center justify-between border-b pb-2">
-                        <h3 className="text-sm font-semibold">Meeting Chat</h3>
-                        <span className="bg-primary text-primary-foreground rounded-full px-1.5 text-[10px]">
-                            3
-                        </span>
-                    </div>
-                    <div className="flex-1 space-y-4">
-                        <div className="space-y-1">
-                            <span className="text-[10px] font-bold">
-                                Jessica Smith{' '}
-                                <span className="text-muted-foreground font-normal">
-                                    10:45 AM
-                                </span>
-                            </span>
-                            <p className="bg-muted rounded-lg rounded-tl-none p-2 text-xs">
-                                Should we start the presentation?
-                            </p>
-                        </div>
-                        <div className="space-y-1 text-right">
-                            <span className="text-[10px] font-bold">
-                                You{' '}
-                                <span className="text-muted-foreground font-normal">
-                                    10:46 AM
-                                </span>
-                            </span>
-                            <p className="bg-primary text-primary-foreground rounded-lg rounded-tr-none p-2 text-xs">
-                                Yes, go ahead. I'm ready.
-                            </p>
-                        </div>
-                    </div>
-                    <div className="flex gap-2 border-t pt-4">
-                        <input
-                            className="flex-1 border-none bg-transparent text-xs focus:outline-none"
-                            placeholder="Message everyone..."
-                        />
-                    </div>
-                </div>
-            </div>
-
-            {/* Controls */}
-            <div className="bg-background mx-auto flex w-fit items-center justify-center gap-4 rounded-full border px-6 py-4 shadow-lg">
-                <Button
-                    variant="outline"
-                    size="icon"
-                    className="h-12 w-12 rounded-full"
-                >
-                    <Mic className="h-5 w-5" />
-                </Button>
-                <Button
-                    variant="outline"
-                    size="icon"
-                    className="h-12 w-12 rounded-full"
-                >
-                    <VideoIcon className="h-5 w-5" />
-                </Button>
-                <Button
-                    variant="outline"
-                    size="icon"
-                    className="h-12 w-12 rounded-full"
-                >
-                    <Hand className="h-5 w-5" />
-                </Button>
-                <Button
-                    variant="outline"
-                    size="icon"
-                    className="h-12 w-12 rounded-full"
-                >
-                    <Users className="h-5 w-5" />
-                </Button>
-                <Button
-                    variant="outline"
-                    size="icon"
-                    className="h-12 w-12 rounded-full"
-                >
-                    <MessageSquare className="h-5 w-5" />
-                </Button>
-                <Button
-                    variant="outline"
-                    size="icon"
-                    className="h-12 w-12 rounded-full"
-                >
-                    <MoreHorizontal className="h-5 w-5" />
-                </Button>
-                <Separator orientation="vertical" className="mx-2 h-8" />
-                <Button
-                    variant="destructive"
-                    size="icon"
-                    className="h-12 w-12 rounded-full"
-                >
-                    <PhoneOff className="h-5 w-5" />
-                </Button>
-            </div>
-        </div>
+    // Fetch projects for current org
+    const { data: projectsData } = trpc.project.search.useQuery(
+        { organizationId: activeOrgId!, limit: 100 },
+        { enabled: !!activeOrgId },
     );
-}
 
-function Separator({
-    orientation,
-    className,
-}: {
-    orientation: string;
-    className?: string;
-}) {
+    // Fetch active sessions for current org
+    const { data: activeSessions, isLoading: activeLoading } =
+        trpc.meet.getActiveSessions.useQuery(
+            { organizationId: activeOrgId! },
+            { enabled: !!activeOrgId },
+        );
+
+    // Fetch history for current org (only meetings user participated in)
+    const { data: history, isLoading: historyLoading } =
+        trpc.meet.getHistory.useQuery(
+            { organizationId: activeOrgId ?? undefined },
+            { enabled: !!activeOrgId },
+        );
+
+    const createMeeting = trpc.meet.create.useMutation({
+        onSuccess: (meeting: any) => {
+            toast.success('Meeting created!');
+            router.push(`/dashboard/meet/${meeting.id}`);
+        },
+        onError: (err: any) => {
+            toast.error(err.message);
+            setIsCreating(false);
+        },
+    });
+
+    const handleCreate = () => {
+        if (!roomName) return toast.error('Please enter a room name');
+        if (!activeOrgId) return toast.error('Please select an organization');
+
+        setIsCreating(true);
+        createMeeting.mutate({
+            name: roomName,
+            organizationId: activeOrgId,
+            projectId: selectedProjectId,
+        });
+    };
+
+    const utils = trpc.useUtils();
+
+    const handleJoin = () => {
+        if (!inviteCode) return toast.error('Please enter an invite code');
+        toast.promise(
+            (async () => {
+                const meeting = await utils.meet.getRoom.fetch({ inviteCode });
+                if (!meeting) throw new Error('Meeting not found');
+                router.push(`/dashboard/meet/${meeting.id}`);
+            })(),
+            {
+                loading: 'Joining meeting...',
+                success: 'Joined!',
+                error: (err: any) => err.message || 'Failed to join meeting',
+            },
+        );
+    };
+
+    if (orgLoading) {
+        return (
+            <div className="flex justify-center p-12">
+                <Loader2 className="h-8 w-8 animate-spin opacity-20" />
+            </div>
+        );
+    }
+
+    if (!activeOrgId) {
+        return (
+            <div className="text-muted-foreground flex flex-col items-center justify-center gap-4 p-12">
+                <VideoOff className="h-12 w-12" />
+                <p className="text-md text-center">
+                    Please select an organization to view meetings.
+                </p>
+            </div>
+        );
+    }
+
     return (
-        <div
-            className={`bg-border ${orientation === 'vertical' ? 'h-full w-[1px]' : 'h-[1px] w-full'} ${className}`}
-        />
+        <div className="flex flex-col gap-8 px-4">
+            <div className="flex flex-col gap-2">
+                <h1 className="text-3xl font-bold tracking-tight">Meetings</h1>
+                <p className="text-muted-foreground">
+                    Start a new meeting, join one, or view active sessions.
+                </p>
+            </div>
+
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                {/* Create Room */}
+                <Card className="border-primary/20 border-2 shadow-lg transition-shadow hover:shadow-xl">
+                    <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                            <Plus className="text-primary h-5 w-5" />
+                            Create New Room
+                        </CardTitle>
+                        <CardDescription>
+                            Start a new session for your organization.
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                        <Input
+                            placeholder="Room name (e.g. Weekly Sync)"
+                            value={roomName}
+                            onChange={(e) => setRoomName(e.target.value)}
+                            onKeyDown={(e) =>
+                                e.key === 'Enter' && handleCreate()
+                            }
+                        />
+
+                        <Select
+                            value={selectedProjectId?.toString() || 'none'}
+                            onValueChange={(val) =>
+                                setSelectedProjectId(
+                                    val === 'none' ? undefined : parseInt(val),
+                                )
+                            }
+                        >
+                            <SelectTrigger>
+                                <SelectValue placeholder="Select project (optional)" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="none">No project</SelectItem>
+                                {projectsData?.data?.map((project: any) => (
+                                    <SelectItem
+                                        key={project.id}
+                                        value={project.id.toString()}
+                                    >
+                                        <div className="flex items-center gap-2">
+                                            <FolderKanban className="h-4 w-4" />
+                                            {project.name}
+                                        </div>
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+
+                        <Button
+                            className="w-full"
+                            onClick={handleCreate}
+                            disabled={isCreating}
+                        >
+                            {isCreating ? (
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            ) : (
+                                <Video className="mr-2 h-4 w-4" />
+                            )}
+                            Start Meeting
+                        </Button>
+                    </CardContent>
+                </Card>
+
+                {/* Join Room */}
+                <Card className="border-muted border-2 shadow-md transition-shadow hover:shadow-lg">
+                    <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                            <LinkIcon className="h-5 w-5" />
+                            Join with Code
+                        </CardTitle>
+                        <CardDescription>
+                            Enter an invite code to join a meeting.
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                        <Input
+                            placeholder="Invite code"
+                            value={inviteCode}
+                            onChange={(e) => setInviteCode(e.target.value)}
+                            onKeyDown={(e) => e.key === 'Enter' && handleJoin()}
+                        />
+                        <Button
+                            variant="outline"
+                            className="w-full"
+                            onClick={handleJoin}
+                        >
+                            Join
+                        </Button>
+                    </CardContent>
+                </Card>
+            </div>
+
+            {/* Active Sessions & History Tabs */}
+            <Tabs defaultValue="active" className="w-full">
+                <TabsList className="grid w-full max-w-md grid-cols-2">
+                    <TabsTrigger
+                        value="active"
+                        className="flex items-center gap-2"
+                    >
+                        <Radio className="h-4 w-4" />
+                        Active Sessions
+                        {activeSessions && activeSessions.length > 0 && (
+                            <Badge variant="secondary" className="ml-1">
+                                {activeSessions.length}
+                            </Badge>
+                        )}
+                    </TabsTrigger>
+                    <TabsTrigger
+                        value="history"
+                        className="flex items-center gap-2"
+                    >
+                        <History className="h-4 w-4" />
+                        History
+                    </TabsTrigger>
+                </TabsList>
+
+                {/* Active Sessions Tab */}
+                <TabsContent value="active" className="mt-4">
+                    {activeLoading ? (
+                        <div className="flex justify-center p-12">
+                            <Loader2 className="h-8 w-8 animate-spin opacity-20" />
+                        </div>
+                    ) : activeSessions && activeSessions.length > 0 ? (
+                        <div className="grid grid-cols-1 gap-4">
+                            {activeSessions.map((session: any) => (
+                                <Card
+                                    key={session.id}
+                                    className="hover:bg-muted/50 border-l-4 border-l-green-500 transition-colors"
+                                >
+                                    <CardContent className="flex flex-col justify-between gap-4 p-4 md:flex-row md:items-center">
+                                        <div className="flex items-center gap-4">
+                                            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-green-100 text-green-600 dark:bg-green-900 dark:text-green-400">
+                                                <Radio className="h-5 w-5 animate-pulse" />
+                                            </div>
+                                            <div>
+                                                <div className="flex items-center gap-2">
+                                                    <h3 className="font-semibold">
+                                                        {session.name}
+                                                    </h3>
+                                                    <Badge
+                                                        variant="default"
+                                                        className="bg-green-500"
+                                                    >
+                                                        Live
+                                                    </Badge>
+                                                </div>
+                                                <div className="text-muted-foreground mt-1 flex items-center gap-4 text-xs">
+                                                    {session.project && (
+                                                        <span className="flex items-center gap-1">
+                                                            <FolderKanban className="h-3 w-3" />
+                                                            {
+                                                                session.project
+                                                                    .name
+                                                            }
+                                                        </span>
+                                                    )}
+                                                    <span className="flex items-center gap-1">
+                                                        <Users className="h-3 w-3" />
+                                                        {
+                                                            session.activeParticipantCount
+                                                        }{' '}
+                                                        participant
+                                                        {session.activeParticipantCount !==
+                                                        1
+                                                            ? 's'
+                                                            : ''}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div className="flex items-center gap-4">
+                                            <div className="text-muted-foreground flex items-center gap-2 text-sm">
+                                                <User className="h-4 w-4" />
+                                                <span>
+                                                    {session.host?.name ||
+                                                        'Unknown'}
+                                                </span>
+                                            </div>
+                                            <Button
+                                                size="sm"
+                                                onClick={() =>
+                                                    router.push(
+                                                        `/dashboard/meet/${session.id}`,
+                                                    )
+                                                }
+                                            >
+                                                Join
+                                            </Button>
+                                        </div>
+                                    </CardContent>
+                                </Card>
+                            ))}
+                        </div>
+                    ) : (
+                        <Card className="text-muted-foreground flex flex-col items-center justify-center gap-2 border-dashed p-12">
+                            <VideoOff className="h-8 w-8" />
+                            <p className="text-md text-center">
+                                No active meetings in this organization.
+                            </p>
+                        </Card>
+                    )}
+                </TabsContent>
+
+                {/* History Tab */}
+                <TabsContent value="history" className="mt-4">
+                    {historyLoading ? (
+                        <div className="flex justify-center p-12">
+                            <Loader2 className="h-8 w-8 animate-spin opacity-20" />
+                        </div>
+                    ) : history && history.length > 0 ? (
+                        <div className="grid grid-cols-1 gap-4">
+                            {history.map((item: any, index: number) => (
+                                <Card
+                                    key={`${index}-${item.meeting.id}`}
+                                    className="hover:bg-muted/50 transition-colors"
+                                >
+                                    <CardContent className="flex flex-col justify-between gap-4 p-4 md:flex-row md:items-center">
+                                        <div className="flex items-center gap-4">
+                                            <div className="bg-primary/10 text-primary flex h-10 w-10 items-center justify-center rounded-full">
+                                                <Calendar className="h-5 w-5" />
+                                            </div>
+                                            <div>
+                                                <h3 className="font-semibold">
+                                                    {item.meeting.name}
+                                                </h3>
+                                                <div className="text-muted-foreground mt-1 flex items-center gap-4 text-xs">
+                                                    <span>
+                                                        {format(
+                                                            new Date(
+                                                                item.joinedAt,
+                                                            ),
+                                                            'PPP p',
+                                                        )}
+                                                    </span>
+                                                    {item.meeting.project && (
+                                                        <span className="flex items-center gap-1">
+                                                            <FolderKanban className="h-3 w-3" />
+                                                            {
+                                                                item.meeting
+                                                                    .project
+                                                                    .name
+                                                            }
+                                                        </span>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div className="flex items-center gap-6">
+                                            <div className="text-muted-foreground flex items-center gap-2 text-sm">
+                                                <User className="h-4 w-4" />
+                                                <span>
+                                                    Hosted by{' '}
+                                                    {item.meeting.host?.name ||
+                                                        'Unknown'}
+                                                </span>
+                                            </div>
+                                            <Button
+                                                size="sm"
+                                                variant="ghost"
+                                                onClick={() =>
+                                                    router.push(
+                                                        `/dashboard/meet/history/${item.meeting.id}`,
+                                                    )
+                                                }
+                                            >
+                                                View Details{' '}
+                                                <ArrowRight className="ml-2 h-4 w-4" />
+                                            </Button>
+                                        </div>
+                                    </CardContent>
+                                </Card>
+                            ))}
+                        </div>
+                    ) : (
+                        <Card className="text-muted-foreground flex flex-col items-center justify-center gap-2 border-dashed p-12">
+                            <VideoOff className="h-8 w-8" />
+                            <p className="text-md text-center">
+                                No meeting history found.
+                            </p>
+                            <p className="text-sm">
+                                Completed meetings you participated in will
+                                appear here.
+                            </p>
+                        </Card>
+                    )}
+                </TabsContent>
+            </Tabs>
+        </div>
     );
 }
