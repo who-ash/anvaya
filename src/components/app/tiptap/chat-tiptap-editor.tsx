@@ -73,6 +73,7 @@ const ChatTiptapEditor = forwardRef<ChatTiptapEditorRef, ChatTiptapEditorProps>(
                 attributes: {
                     class: cn(
                         'prose prose-sm dark:prose-invert max-w-none',
+                        'dark:text-foreground text-foreground',
                         'focus:outline-none',
                         'min-h-[40px] max-h-[200px] overflow-y-auto',
                         'px-3 py-2',
@@ -180,7 +181,8 @@ const ChatTiptapEditor = forwardRef<ChatTiptapEditorRef, ChatTiptapEditorProps>(
                 <EditorContent editor={editor} />
                 <style jsx global>{`
                     .ProseMirror p.is-editor-empty:first-child::before {
-                        color: hsl(var(--muted-foreground));
+                        color: var(--muted-foreground);
+                        opacity: 0.6;
                         content: attr(data-placeholder);
                         float: left;
                         height: 0;
@@ -189,6 +191,11 @@ const ChatTiptapEditor = forwardRef<ChatTiptapEditorRef, ChatTiptapEditorProps>(
 
                     .ProseMirror {
                         scrollbar-width: thin;
+                        color: inherit;
+                    }
+
+                    .dark .ProseMirror:not(.text-inherit) {
+                        color: var(--foreground);
                     }
 
                     .ProseMirror::-webkit-scrollbar {
@@ -200,16 +207,19 @@ const ChatTiptapEditor = forwardRef<ChatTiptapEditorRef, ChatTiptapEditorProps>(
                     }
 
                     .ProseMirror::-webkit-scrollbar-thumb {
-                        background: hsl(var(--muted-foreground) / 0.3);
+                        background: var(--muted-foreground);
+                        opacity: 0.3;
                         border-radius: 3px;
                     }
 
                     .ProseMirror::-webkit-scrollbar-thumb:hover {
-                        background: hsl(var(--muted-foreground) / 0.5);
+                        background: var(--muted-foreground);
+                        opacity: 0.5;
                     }
 
                     .ProseMirror p {
                         margin: 0;
+                        color: inherit;
                     }
 
                     .ProseMirror ul,
@@ -226,14 +236,14 @@ const ChatTiptapEditor = forwardRef<ChatTiptapEditorRef, ChatTiptapEditorProps>(
                     }
 
                     .ProseMirror code {
-                        background-color: hsl(var(--muted));
+                        background-color: var(--muted);
                         padding: 0.125rem 0.25rem;
                         border-radius: 0.25rem;
                         font-size: 0.875em;
                     }
 
                     .ProseMirror pre {
-                        background-color: hsl(var(--muted));
+                        background-color: var(--muted);
                         padding: 0.5rem;
                         border-radius: 0.375rem;
                         margin: 0.5rem 0;
@@ -246,10 +256,10 @@ const ChatTiptapEditor = forwardRef<ChatTiptapEditorRef, ChatTiptapEditorProps>(
                     }
 
                     .ProseMirror blockquote {
-                        border-left: 3px solid hsl(var(--border));
+                        border-left: 3px solid var(--border);
                         padding-left: 1rem;
                         margin: 0.5rem 0;
-                        color: hsl(var(--muted-foreground));
+                        color: var(--muted-foreground);
                     }
 
                     .ProseMirror img {

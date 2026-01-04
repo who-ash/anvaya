@@ -312,7 +312,7 @@ export default function TiptapEditor({
             attributes: {
                 class: cn(
                     'prose dark:prose-invert prose-sm sm:prose-base lg:prose-lg xl:prose-xl max-w-none',
-                    'text-foreground w-full rounded-md border-input bg-transparent focus-visible:outline-none',
+                    'dark:text-foreground text-foreground w-full rounded-md border-input bg-transparent focus-visible:outline-none',
                     !editorClassName?.includes('p-') && 'p-4',
                     !editorClassName?.includes('border') && 'border',
                     !editorClassName?.includes('min-h-') && 'min-h-[200px]',
@@ -461,7 +461,7 @@ export default function TiptapEditor({
     }
 
     return (
-        <div className={cn('w-full', className)}>
+        <div className={cn('text-foreground w-full', className)}>
             {!hideToolbar && (
                 <div className="border-input bg-background rounded-t-md border">
                     <div className="scrollbar-thin flex items-center gap-1 overflow-x-auto border-b p-1 whitespace-nowrap">
@@ -1026,12 +1026,16 @@ export default function TiptapEditor({
                 .ProseMirror p.is-editor-empty:first-child::before {
                     content: attr(data-placeholder);
                     float: left;
-                    color: #adb5bd;
+                    color: var(--muted-foreground);
+                    opacity: 0.6;
                     pointer-events: none;
                     height: 0;
                 }
                 .ProseMirror {
                     color: inherit;
+                }
+                .dark .ProseMirror:not(.text-inherit) {
+                    color: var(--foreground);
                 }
             `}</style>
         </div>

@@ -187,6 +187,9 @@ export default function TiptapViewer({
                     overflow-wrap: break-word;
                     word-break: break-word;
                 }
+                .dark .ProseMirror:not(.text-inherit) {
+                    color: var(--foreground);
+                }
                 .ProseMirror * {
                     max-width: 100%;
                     overflow-wrap: break-word;
