@@ -10,6 +10,8 @@ import { taskCommentRouter } from './task-comment.router';
 import { chatRouter } from './chat.router';
 import { timeTrackingRouter } from './time-tracking.router';
 import { requestRouter } from './request.router';
+import { meetRouter } from './meet.router';
+import { dashboardRouter } from './dashboard.router';
 
 export const appRouter = router({
     user: userRouter,
@@ -23,6 +25,8 @@ export const appRouter = router({
     chat: chatRouter,
     timeTracking: timeTrackingRouter,
     request: requestRouter,
+    meet: meetRouter,
+    dashboard: dashboardRouter,
 });
 
 export type AppRouter = typeof appRouter;
