@@ -202,7 +202,6 @@ export default function DashboardPage() {
                     value={analytics?.projectStats?.active ?? 0}
                     icon={Briefcase}
                     period="Currently in progress"
-                    iconColor="text-blue-500"
                     onClick={() => router.push('/dashboard/projects')}
                 />
                 <StatsCard
@@ -210,7 +209,6 @@ export default function DashboardPage() {
                     value={analytics?.sprintStats?.active ?? 0}
                     icon={Layers}
                     period="Active across projects"
-                    iconColor="text-purple-500"
                     onClick={() => router.push('/dashboard/sprints')}
                 />
                 <StatsCard
@@ -221,7 +219,6 @@ export default function DashboardPage() {
                     }
                     icon={CheckSquare}
                     period="Need attention"
-                    iconColor="text-amber-500"
                     onClick={() => router.push('/dashboard/tasks')}
                 />
                 <StatsCard
@@ -229,7 +226,6 @@ export default function DashboardPage() {
                     value={analytics?.recentRequests?.length ?? 0}
                     icon={AlertCircle}
                     period="Involved in"
-                    iconColor="text-rose-500"
                     onClick={() => router.push('/dashboard/requests')}
                 />
             </div>
@@ -364,8 +360,8 @@ export default function DashboardPage() {
                                         }
                                     >
                                         <div className="flex items-center gap-3">
-                                            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-orange-100 dark:bg-orange-900">
-                                                <Briefcase className="h-4 w-4 text-orange-600 dark:text-orange-400" />
+                                            <div className="bg-primary/10 flex h-8 w-8 items-center justify-center rounded-lg">
+                                                <Briefcase className="h-4 w-4" />
                                             </div>
                                             <div className="min-w-0 flex-1 space-y-0.5">
                                                 <p className="truncate text-sm font-medium">
@@ -455,12 +451,10 @@ export default function DashboardPage() {
                 </Card>
             </div>
 
-            <div className="mt-4 grid gap-4 border-t pt-4 md:grid-cols-2 lg:grid-cols-7">
+            <div className="mt-4 grid gap-4 pt-4 md:grid-cols-2 lg:grid-cols-7">
                 <Card className="md:col-span-7">
                     <CardHeader>
-                        <CardTitle>
-                            Resource Allocation / Time-Intensive Tasks
-                        </CardTitle>
+                        <CardTitle>Time-Intensive Tasks</CardTitle>
                         <CardDescription>
                             Tasks where you've spent the most time in the
                             selected period.
@@ -481,8 +475,8 @@ export default function DashboardPage() {
                                         }
                                     >
                                         <div className="flex items-center gap-3">
-                                            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900">
-                                                <Clock className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                                            <div className="bg-primary/10 flex h-9 w-9 items-center justify-center rounded-full">
+                                                <Clock className="h-5 w-5" />
                                             </div>
                                             <div className="space-y-1">
                                                 <p className="text-sm leading-none font-medium">
