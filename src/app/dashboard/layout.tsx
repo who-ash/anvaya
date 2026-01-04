@@ -54,6 +54,12 @@ const BreadcrumbLabel = ({
         { enabled: isId && parentPart === 'requests' },
     );
 
+    // Fetch organization by ID
+    const { data: organization } = trpc.organization.getById.useQuery(
+        { id: Number(part) },
+        { enabled: isId && parentPart === 'organizations' },
+    );
+
     if (isId) {
         if (parentPart === 'projects' && project)
             return <span>{project.name}</span>;
@@ -62,6 +68,8 @@ const BreadcrumbLabel = ({
         if (parentPart === 'tasks' && task) return <span>{task.name}</span>;
         if (parentPart === 'requests' && request)
             return <span>{request.title}</span>;
+        if (parentPart === 'organizations' && organization)
+            return <span>{organization.name}</span>;
         return <span>Loading...</span>;
     }
 
@@ -158,7 +166,9 @@ export default function DashboardLayout({
                         </Breadcrumb>
                     </div>
                 </header>
-                <div className="flex flex-1 flex-col gap-4 p-4">{children}</div>
+                <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-hidden p-4">
+                    {children}
+                </div>
             </SidebarInset>
         </SidebarProvider>
     );
