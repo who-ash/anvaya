@@ -1,16 +1,47 @@
 'use client';
 
-import { useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { TaskList } from '@/components/app/dashboard/tasks/task-list';
 import { trpc } from '@/providers/trpc-provider';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useOrganization } from '@/providers/organization-provider';
+import {
+    Card,
+    CardContent,
+    CardHeader,
+    CardTitle,
+    CardDescription,
+} from '@/components/ui/card';
 
-export default function TasksPage() {
+function TasksContent() {
+    const searchParams = useSearchParams();
     const { activeOrgId, isLoading: isLoadingOrg } = useOrganization();
-    const [selectedProjectIds, setSelectedProjectIds] = useState<number[]>([]);
+
+    // Initialize state from search parameters
+    const [selectedProjectIds, setSelectedProjectIds] = useState<number[]>(
+        () => {
+            const projectId = searchParams.get('projectId');
+            return projectId ? [parseInt(projectId)] : [];
+        },
+    );
     const [selectedSprintIds, setSelectedSprintIds] = useState<number[]>([]);
-    const [selectedStatuses, setSelectedStatuses] = useState<string[]>([]);
+    const [selectedStatuses, setSelectedStatuses] = useState<string[]>(() => {
+        const status = searchParams.get('status');
+        return status ? [status] : [];
+    });
+
+    // Update state if search params change
+    useEffect(() => {
+        const status = searchParams.get('status');
+        if (status) {
+            setSelectedStatuses([status]);
+        }
+        const projectId = searchParams.get('projectId');
+        if (projectId) {
+            setSelectedProjectIds([parseInt(projectId)]);
+        }
+    }, [searchParams]);
     const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
 
     const { data: projects, isLoading: isLoadingProjects } =
@@ -69,5 +100,13 @@ export default function TasksPage() {
                 organizationId={activeOrgId}
             />
         </div>
+    );
+}
+
+export default function TasksPage() {
+    return (
+        <Suspense fallback={<Skeleton className="h-96 w-full" />}>
+            <TasksContent />
+        </Suspense>
     );
 }
