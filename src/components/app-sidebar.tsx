@@ -51,6 +51,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
     const navMain = [
         {
+            title: 'Dashboard',
+            url: '/dashboard',
+            icon: LayoutDashboard,
+        },
+        {
             title: 'Projects',
             url: '/dashboard/projects',
             icon: Folder,
@@ -89,6 +94,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             title: 'Report',
             url: '/dashboard/reports',
             icon: FileText,
+        },
+        {
+            title: 'Organizations',
+            url: '/dashboard/organizations',
+            icon: Building2,
         },
 
         // {
